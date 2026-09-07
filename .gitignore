@@ -1,0 +1,43 @@
+# Environment
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+
+# Node / Hardhat / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project artifacts (never commit)
+evidence_*.json
+face_crops/
+*.onnx
+models/
+insightface_models/
+
+# Streamlit
+.streamlit/secrets.toml

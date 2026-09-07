@@ -1,0 +1,16 @@
+{
+  "name": "provenance-contracts",
+  "version": "1.0.0",
+  "description": "AttestationRegistry smart contract for PROVENANCE pipeline",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "deploy:amoy": "npx hardhat run scripts/deploy.js --network amoy",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
+    "test": "npx hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0",
+    "dotenv": "^16.3.0"
+  }
+}

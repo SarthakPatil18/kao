@@ -1,0 +1,34 @@
+# Face detection & embedding
+insightface>=0.7.3
+onnxruntime>=1.16.0
+
+# Face mesh / liveness
+mediapipe>=0.10.0
+
+# Image processing
+opencv-python-headless>=4.8.0
+numpy>=1.24.0
+Pillow>=10.0.0
+imagehash>=4.3.1
+
+# Text embedding for scoring
+sentence-transformers>=2.2.0
+
+# Reverse image search
+google-search-results>=2.4.2
+
+# Blockchain
+web3>=6.0.0
+
+# IPFS
+requests>=2.31.0
+
+# App
+streamlit>=1.28.0
+fastapi>=0.110.0
+uvicorn>=0.28.0
+python-multipart>=0.0.9
+python-dotenv>=1.0.0
+
+# Testing
+pytest>=7.4.0
