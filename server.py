@@ -240,18 +240,26 @@ async def execute_pipeline(
     annotated_b64 = np_to_base64_jpeg(annotated_rgb)
     face_crop_b64 = np_to_base64_jpeg(face_crop_rgb)
 
+    # Resolve environment keys if not explicitly passed in request
+    effective_serpapi_key = serpapi_key or os.getenv("SERPAPI_KEY")
+    effective_bing_key = bing_key or os.getenv("BING_API_KEY")
+    effective_pinata_jwt = pinata_jwt or os.getenv("PINATA_JWT")
+    effective_private_key = private_key or os.getenv("PRIVATE_KEY")
+    effective_contract_address = contract_address or os.getenv("CONTRACT_ADDRESS")
+    effective_rpc_url = os.getenv("RPC_URL", "https://rpc-amoy.polygon.technology/")
+
     # 4. Stage 4: Web Reverse Discovery
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
         cv2.imwrite(tmp.name, input_bgr)
         tmp_path = tmp.name
 
-    allow_sim = (search_mode == "simulated") or (not serpapi_key and not bing_key)
+    # Try live search if keys are provided, with simulated fallback on error
     search_results = search_by_image(
         tmp_path,
-        serpapi_key=serpapi_key if serpapi_key else None,
-        bing_key=bing_key if bing_key else None,
+        serpapi_key=effective_serpapi_key if effective_serpapi_key else None,
+        bing_key=effective_bing_key if effective_bing_key else None,
         num_results=6,
-        allow_simulated=allow_sim,
+        allow_simulated=True,
     )
     if os.path.exists(tmp_path):
         os.unlink(tmp_path)
@@ -343,9 +351,13 @@ async def execute_pipeline(
 
     # 7. Stage 7: IPFS Content Addressing
     ipfs_cid_val = None
-    if pinata_jwt and storage_mode == "pinata":
-        from pipeline.ipfs_store import upload_to_ipfs
-        ipfs_cid_val = upload_to_ipfs(canonical_json_str, pinata_jwt)
+    if effective_pinata_jwt:
+        try:
+            from pipeline.ipfs_store import upload_to_ipfs
+            ipfs_cid_val = upload_to_ipfs(canonical_json_str, effective_pinata_jwt)
+            logger.info(f"Successfully pinned to live Pinata IPFS: {ipfs_cid_val}")
+        except Exception as p_err:
+            logger.warning(f"Pinata pinning error: {p_err}")
 
     if not ipfs_cid_val:
         import hashlib
@@ -363,12 +375,12 @@ async def execute_pipeline(
 
     # Blockchain Anchor
     blockchain_receipt = None
-    if chain_mode == "polygon_amoy" and private_key and contract_address:
+    if effective_private_key and effective_contract_address:
         try:
             from pipeline.blockchain import connect, get_contract, anchor_root
-            w3 = connect(rpc_url or "https://rpc-amoy.polygon.technology/")
-            contract = get_contract(w3, contract_address)
-            tx_res = anchor_root(w3, contract, m_tree.root, ipfs_cid_val, private_key)
+            w3 = connect(effective_rpc_url)
+            contract = get_contract(w3, effective_contract_address)
+            tx_res = anchor_root(w3, contract, m_tree.root, ipfs_cid_val, effective_private_key)
             blockchain_receipt = {
                 "mode": "Live Polygon Amoy",
                 "tx_hash": tx_res.tx_hash,
