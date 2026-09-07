@@ -45,8 +45,13 @@ PLATFORM_PATTERNS = {
     "youtube": re.compile(r"youtube\.com", re.I),
     "reddit": re.compile(r"reddit\.com", re.I),
     "medium": re.compile(r"medium\.com", re.I),
+    "tiktok": re.compile(r"tiktok\.com", re.I),
+    "threads": re.compile(r"threads\.net", re.I),
+    "bluesky": re.compile(r"(bsky\.app|bluesky)", re.I),
+    "substack": re.compile(r"substack\.com", re.I),
+    "pinterest": re.compile(r"pinterest\.com", re.I),
     "news": re.compile(
-        r"(reuters|apnews|bbc|cnn|nytimes|theguardian|washingtonpost)"
+        r"(reuters|apnews|bbc|cnn|nytimes|theguardian|washingtonpost|bloomberg|forbes|techcrunch)"
         r"\.com",
         re.I,
     ),
@@ -64,7 +69,7 @@ class SearchResult:
     url: str
     thumbnail_url: str = ""
     source: str = ""                    # e.g. "Google Lens", "Bing Visual"
-    platform: str = "other"             # Classified platform
+    platform: str = "web"               # Classified platform
     snippet: str = ""                   # Surrounding text / caption
     position: int = 0                   # Rank in results
     image_bytes: Optional[bytes] = None # Downloaded candidate image
@@ -75,11 +80,22 @@ class SearchResult:
 # ---------------------------------------------------------------------------
 
 def classify_platform(url: str) -> str:
-    """Classify a URL into a known platform category."""
+    """Classify a URL into a known platform category or clean domain name."""
+    if not url:
+        return "web"
     for platform, pattern in PLATFORM_PATTERNS.items():
         if pattern.search(url):
             return platform
-    return "other"
+    try:
+        netloc = urlparse(url).netloc.lower()
+        if netloc.startswith("www."):
+            netloc = netloc[4:]
+        parts = netloc.split(".")
+        if len(parts) >= 2:
+            return parts[-2]
+        return netloc or "web"
+    except Exception:
+        return "web"
 
 
 # ---------------------------------------------------------------------------

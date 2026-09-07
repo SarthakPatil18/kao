@@ -393,7 +393,8 @@ export default function App() {
 
             <div className="result-info">
               <div className="platform-tag">
-                {pipelineResult.discovery.top_match.platform.toUpperCase()}
+                <span className="platform-dot">●</span>
+                <span>{pipelineResult.discovery.top_match.platform.toUpperCase()}</span>
               </div>
 
               <div className="post-link-box">
@@ -430,6 +431,35 @@ export default function App() {
               </div>
             </div>
           </div>
+
+          {/* All Discovered Web Candidates with Platform Badges */}
+          {pipelineResult.discovery.all_candidates && pipelineResult.discovery.all_candidates.length > 1 && (
+            <div className="candidates-section">
+              <div className="candidates-title">
+                All Discovered Web Profiles ({pipelineResult.discovery.all_candidates.length})
+              </div>
+              <div className="candidates-list">
+                {pipelineResult.discovery.all_candidates.map((cand, idx) => (
+                  <div key={idx} className="candidate-row">
+                    {cand.thumbnail_b64 && (
+                      <img src={cand.thumbnail_b64} alt={cand.title} className="candidate-thumb" />
+                    )}
+                    <div className="candidate-details">
+                      <div className="candidate-meta">
+                        <span className="candidate-platform">{cand.platform.toUpperCase()}</span>
+                        <span className="candidate-tier">
+                          Match: {(cand.score.confidence * 100).toFixed(0)}% ({cand.score.tier})
+                        </span>
+                      </div>
+                      <a href={cand.url} target="_blank" rel="noreferrer" className="candidate-link">
+                        {cand.title}
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <hr className="divider" />
 
